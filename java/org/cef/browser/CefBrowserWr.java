@@ -9,6 +9,7 @@ import java.awt.Canvas;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.MouseInfo;
 import java.awt.Point;
@@ -55,6 +56,8 @@ class CefBrowserWr extends CefBrowser_N {
     private Point inspectAt_ = null;
     private CefBrowserWr devTools_ = null;
     private boolean isDisposed = false;
+   private final Frame reparentingHiddenFrame;
+    private final Canvas reparentingHiddenCanvas;
     private Timer delayedUpdate_ = new Timer(100, new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -169,6 +172,12 @@ class CefBrowserWr extends CefBrowser_N {
         parent_ = parent;
         inspectAt_ = inspectAt;
         delayedUpdate_.setRepeats(false);
+       
+       reparentingHiddenFrame = new Frame();
+        reparentingHiddenFrame.setSize(0, 0);
+        reparentingHiddenCanvas = new Canvas();
+        reparentingHiddenFrame.add(reparentingHiddenCanvas);
+        reparentingHiddenFrame.addNotify();
 
         // Disabling lightweight of popup menu is required because
         // otherwise it will be displayed behind the content of component_
@@ -178,6 +187,25 @@ class CefBrowserWr extends CefBrowser_N {
         // We're using a JComponent instead of a Canvas now because the
         // JComponent has clipping informations, which aren't accessible for Canvas.
         component_ = new JPanel(new BorderLayout()) {
+           @Override
+            public void addNotify() {
+                super.addNotify();
+
+                if(OS.isWindows() && canvas_ != null) {
+                    setParent(canvas_);
+                }
+            }
+
+            @Override
+            public void removeNotify() {
+                if(OS.isWindows() && !isDisposed) {
+                    setParent(reparentingHiddenFrame);
+                    canvas_.setSize(0,0);
+                }
+
+                super.removeNotify();
+            }
+           
             @Override
             public void setBounds(int x, int y, int width, int height) {
                 super.setBounds(x, y, width, height);
@@ -278,6 +306,7 @@ class CefBrowserWr extends CefBrowser_N {
             parent_ = null;
         }
         super.close();
+       reparentingHiddenFrame.dispose();
     }
 
     @Override

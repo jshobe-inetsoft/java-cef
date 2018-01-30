@@ -1874,3 +1874,26 @@ Java_org_cef_browser_CefBrowser_1N_N_1UpdateUI(JNIEnv* env,
     CefPostTask(TID_UI, base::Bind(&CefUpdateWindowRgn, hwnd, contentRect));
 #endif
 }
+
+JNIEXPORT jlong JNICALL
+Java_org_cef_browser_CefBrowser_1N_N_1SetParent(JNIEnv *env,
+                                                jobject obj,
+                                                jobject parent) {
+    CefRefPtr<CefBrowser> browser = JNI_GET_BROWSER_OR_RETURN(env, obj, -2);
+
+    if(!browser.get())
+        return -3;
+    
+#if defined(OS_WIN)
+    HWND parentHwnd = GetHwndOfCanvas(parent, env);
+    HWND hwnd = browser->GetHost()->GetWindowHandle();
+    
+    if (parentHwnd == NULL || hwnd == NULL)
+        return -4;
+    
+    SetParent(hwnd, parentHwnd);
+   return (jlong) parentHwnd;
+#endif
+
+   return -5;
+}

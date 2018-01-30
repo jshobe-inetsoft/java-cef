@@ -508,6 +508,14 @@ JNIEXPORT void JNICALL Java_org_cef_browser_CefBrowser_1N_N_1UpdateUI(JNIEnv*,
                                                                       jobject,
                                                                       jobject);
 
+/*
+ * Class:     org_cef_browser_CefBrowser_N
+ * Method:    N_Execute
+ * Signature: (Ljava/awt/Canvas;)V
+ */
+JNIEXPORT jlong JNICALL Java_org_cef_browser_CefBrowser_1N_N_1SetParent
+  (JNIEnv *, jobject, jobject);
+                                                                     
 #ifdef __cplusplus
 }
 #endif

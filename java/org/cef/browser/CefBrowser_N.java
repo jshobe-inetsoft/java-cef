@@ -622,6 +622,23 @@ abstract class CefBrowser_N extends CefNativeAdapter implements CefBrowser {
         }
     }
 
+    /**
+     * Call this method to reassign the native window the browser is attached to.
+     * @param parent the new parent window
+     * @return the new parent's hwnd or -1 if there is an {@link UnsatisfiedLinkError}.
+     */
+    protected final long setParent(Component parent) {
+        try {
+            return N_SetParent(parent);
+        }
+        catch(UnsatisfiedLinkError ule) {
+            ule.printStackTrace();
+        }
+
+        return -1;
+    }
+
+    private final native long N_SetParent(Component parent);
     private final native boolean N_CreateBrowser(CefClientHandler clientHandler, long windowHandle,
             String url, boolean transparent, Component canvas, CefRequestContext context);
     private final native boolean N_CreateDevTools(CefBrowser parent, CefClientHandler clientHandler,
