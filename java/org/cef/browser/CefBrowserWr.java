@@ -56,7 +56,8 @@ class CefBrowserWr extends CefBrowser_N {
     private Point inspectAt_ = null;
     private CefBrowserWr devTools_ = null;
     private boolean isDisposed = false;
-   private final Frame reparentingHiddenFrame;
+    private boolean allowNextPaint;
+    private final Frame reparentingHiddenFrame;
     private final Canvas reparentingHiddenCanvas;
     private Timer delayedUpdate_ = new Timer(100, new ActionListener() {
         @Override
@@ -193,6 +194,7 @@ class CefBrowserWr extends CefBrowser_N {
 
                 if(OS.isWindows() && canvas_ != null) {
                     setParent(canvas_);
+                    allowNextPaint = true;
                 }
             }
 
@@ -210,6 +212,7 @@ class CefBrowserWr extends CefBrowser_N {
             public void setBounds(int x, int y, int width, int height) {
                 super.setBounds(x, y, width, height);
                 wasResized(width, height);
+                allowNextPaint = true;
             }
 
             @Override
@@ -221,6 +224,7 @@ class CefBrowserWr extends CefBrowser_N {
             public void setSize(int width, int height) {
                 super.setSize(width, height);
                 wasResized(width, height);
+                allowNextPaint = true;
             }
 
             @Override
@@ -238,7 +242,11 @@ class CefBrowserWr extends CefBrowser_N {
                 // we're setting up a delayedUpdate timer which is reset each time
                 // paint is called. This prevents the us of sending the UI update too
                 // often.
-                doUpdate();
+                if(OS.isMacintosh() || allowNextPaint) {
+                    doUpdate();
+                    allowNextPaint = true;
+                }
+
                 delayedUpdate_.restart();
             }
         };
@@ -269,11 +277,11 @@ class CefBrowserWr extends CefBrowser_N {
         component_.addHierarchyBoundsListener(new HierarchyBoundsListener() {
             @Override
             public void ancestorResized(HierarchyEvent e) {
-                doUpdate();
+                //doUpdate();
             }
             @Override
             public void ancestorMoved(HierarchyEvent e) {
-                doUpdate();
+                //doUpdate();
             }
         });
         component_.addHierarchyListener(new HierarchyListener() {
