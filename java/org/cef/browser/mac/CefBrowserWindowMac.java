@@ -6,6 +6,7 @@ package org.cef.browser.mac;
 
 import java.awt.Component;
 import java.awt.peer.ComponentPeer;
+import java.lang.reflect.Method;
 import sun.lwawt.LWComponentPeer;
 import sun.lwawt.PlatformWindow;
 import sun.lwawt.macosx.CFRetainedResource;
@@ -27,14 +28,30 @@ public class CefBrowserWindowMac implements CefBrowserWindow {
             if (peer instanceof LWComponentPeer) {
                 @SuppressWarnings("rawtypes")
                 PlatformWindow pWindow = ((LWComponentPeer) peer).getPlatformWindow();
+                
                 if (pWindow instanceof CPlatformWindow) {
-                    ((CPlatformWindow) pWindow).execute(new CFRetainedResource.CFNativeAction() {
-                        @Override
-                        public void run(long l) {
-                            result[0] = l;
+                    Class<?> clazz = pWindow.getClass();
+
+                    try {
+                        try {
+                            Method method = clazz.getMethod("getNSWindowPtr");
+                            result[0] = (Long) method.invoke(pWindow);
+                            break;
+                        } catch (NoSuchMethodExceptionIgnore e) {
+                            Method method = clazz.getMethod("getLayerPtr");
+                            result[0] = (Long) method.invoke(pWindow);
+                            break;
                         }
-                    });
-                    break;
+                    } catch (Throwable ignore) {
+                    }
+                    
+                    // ((CPlatformWindow) pWindow).execute(new CFRetainedResource.CFNativeAction() {
+                    //     @Override
+                    //     public void run(long l) {
+                    //         result[0] = l;
+                    //     }
+                    // });
+                    // break;
                 }
             }
             comp = comp.getParent();
