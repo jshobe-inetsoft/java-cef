@@ -37,7 +37,7 @@ public class CefBrowserWindowMac implements CefBrowserWindow {
                             Method method = clazz.getMethod("getNSWindowPtr");
                             result[0] = (Long) method.invoke(pWindow);
                             break;
-                        } catch (NoSuchMethodExceptionIgnore e) {
+                        } catch (NoSuchMethodException ignore) {
                             Method method = clazz.getMethod("getLayerPtr");
                             result[0] = (Long) method.invoke(pWindow);
                             break;
